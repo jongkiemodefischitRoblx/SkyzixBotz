@@ -14,6 +14,7 @@ button{width:48%;padding:12px;border:none;color:white;font-weight:bold;border-ra
 .btn-blue{background:#0099ff;}
 button:hover{opacity:.8;}
 .btn-row{display:flex;justify-content:space-between;margin-top:10px;}
+#qrImage{margin-top:10px;width:100%;border-radius:8px;}
 </style>
 </head>
 <body>
@@ -27,39 +28,43 @@ button:hover{opacity:.8;}
     <input type="number" id="owner" placeholder="Nomor Owner (62...)">
     
     <div class="btn-row">
-        <button class="btn-green" onclick="pairing()">Pairing Code</button>
-        <button class="btn-blue" onclick="qrwa()">QR WhatsApp</button>
+        <button class="btn-green" onclick="getPairingCode()">Pairing Code</button>
+        <button class="btn-blue" onclick="checkQR()">QR WhatsApp</button>
     </div>
+    <img id="qrImage" src="" alt="">
 </div>
 
 <script>
-function check(){
+function checkInputs(){
     let email = document.getElementById("email").value;
     let pass = document.getElementById("pass").value;
     let cpass = document.getElementById("cpass").value;
     let bot = document.getElementById("bot").value;
     let owner = document.getElementById("owner").value;
-    if(!email.endsWith("@gmail.com")) return alert("Email harus @gmail.com!");
-    if(pass !== cpass) return alert("Password tidak sama!");
-    if(!bot.startsWith("62")) return alert("Nomor Bot harus format 62!");
-    if(!owner.startsWith("62")) return alert("Nomor Owner harus format 62!");
+    if(!email.endsWith("@gmail.com")) return false;
+    if(pass !== cpass) return false;
+    if(!bot.startsWith("62")) return false;
+    if(!owner.startsWith("62")) return false;
     return true;
 }
 
-function pairing(){
-    if(check()){
-        alert("Pairing Code berhasil dibuat!");
-        sessionStorage.setItem("connected", "true");
-        window.location.href = "dashboard.html";
-    }
+async function getPairingCode(){
+    if(!checkInputs()) return alert("Cek input Anda!");
+    const res = await fetch('http://localhost:3000/pairing');
+    const data = await res.json();
+    if(data.error) return alert(data.error);
+    alert("Pairing Code: " + data.code);
+    sessionStorage.setItem("connected","true");
+    window.location.href = "dashboard.html";
 }
 
-function qrwa(){
-    if(check()){
-        alert("QR WhatsApp berhasil dibuat!");
-        sessionStorage.setItem("connected", "true");
-        window.location.href = "dashboard.html";
-    }
+async function checkQR(){
+    if(!checkInputs()) return alert("Cek input Anda!");
+    const res = await fetch('http://localhost:3000/status');
+    const data = await res.json();
+    if(data.qr) document.getElementById("qrImage").src = data.qr;
+    sessionStorage.setItem("connected","true");
+    window.location.href = "dashboard.html";
 }
 </script>
 </body>
