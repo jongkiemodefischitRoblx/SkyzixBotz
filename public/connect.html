@@ -24,8 +24,8 @@ button:hover{opacity:.8;}
     <input type="text" id="user" placeholder="Masukan Username">
     <input type="password" id="pass" placeholder="Masukan Password">
     <input type="password" id="cpass" placeholder="Confirm Password">
-    <input type="number" id="bot" placeholder="Nomor Bot (62...)">
-    <input type="number" id="owner" placeholder="Nomor Owner (62...)">
+    <input type="text" id="bot" placeholder="Nomor Bot">
+    <input type="text" id="owner" placeholder="Nomor Owner">
     
     <div class="btn-row">
         <button class="btn-green" onclick="getPairingCode()">Pairing Code</button>
@@ -41,10 +41,11 @@ function checkInputs(){
     let cpass = document.getElementById("cpass").value;
     let bot = document.getElementById("bot").value;
     let owner = document.getElementById("owner").value;
+
     if(!email.endsWith("@gmail.com")) return false;
     if(pass !== cpass) return false;
-    if(!bot.startsWith("62")) return false;
-    if(!owner.startsWith("62")) return false;
+    if(!/^\+?\d{9,15}$/.test(bot)) return false;
+    if(!/^\+?\d{9,15}$/.test(owner)) return false;
     return true;
 }
 
