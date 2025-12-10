@@ -28,6 +28,7 @@ button{
     padding:10px 20px;margin-top:15px;background:#03e97b;color:white;font-weight:bold;border:none;border-radius:6px;cursor:pointer;
 }
 button:hover{opacity:.8;}
+#qrStatus{margin-top:10px;width:200px;border-radius:8px;}
 </style>
 </head>
 <body>
@@ -36,38 +37,59 @@ button:hover{opacity:.8;}
         <h2>Dashboard SKYBOTZ</h2>
         <p id="hello"></p>
         <p>Whatsapp Status: <span id="status"></span></p>
+        <p>Nomor Phone: <span id="phone"></span></p>
         <p>Version Bot: Beta</p>
         <p>Developer: SkyZix</p>
         <p>Name Bot: SKYBOTZ [BETA]</p>
         <button id="fuckBtn">Fuck You</button>
         <div id="notif"></div>
+        <img id="qrStatus" src="" alt="">
+        <div id="devices"></div>
     </div>
 </div>
 
 <script>
-// set username & status dari sessionStorage
 document.getElementById("hello").innerText = "Hello " + (sessionStorage.getItem("username") || "User");
-const connected = sessionStorage.getItem("connected") === "true";
-document.getElementById("status").innerText = connected ? "Connected ✅" : "Not Connected ❌";
 
-// tombol Fuck You
-document.getElementById("fuckBtn").onclick = function(){
-    if(!connected) return alert("Device belum connected!");
-    const number = "60175953518"; // admin WA
-    const text = "Sky Kontol";
-    window.open(`https://wa.me/${number}?text=${encodeURIComponent(text)}`, "_blank");
-}
+async function updateStatus(){
+    const res = await fetch('http://localhost:3000/status');
+    const data = await res.json();
 
-// notifikasi device connected
-if(connected){
+    const connected = data.connected;
+    document.getElementById("status").innerText = connected ? "Connected ✅" : "Not Connected ❌";
+    document.getElementById("phone").innerText = connected ? (data.devices[0] || "-") : "-";
+
+    if(data.qr) document.getElementById("qrStatus").src = data.qr;
+
     const notif = document.getElementById("notif");
-    notif.innerHTML = `<p style="margin-top:15px;background:#161b22;padding:10px;border-radius:6px;">
+    if(connected){
+        notif.innerHTML = `<p style="margin-top:15px;background:#161b22;padding:10px;border-radius:6px;">
 NEW DEVICE CONNECTED<br>
 ___________________________________<br>
-No Phone: (62XXXXXX)<br>
+No Phone: ${data.devices[0] || "-"}<br>
 System: Connected ✅<br>
 © SkyZix
 </p>`;
+    } else { notif.innerHTML = ''; }
+
+    const devDiv = document.getElementById("devices");
+    devDiv.innerHTML = "<h4>Linked Devices:</h4>";
+    data.devices.forEach(d=>{
+        const p = document.createElement("p");
+        p.innerText = d;
+        devDiv.appendChild(p);
+    });
+}
+
+setInterval(updateStatus,2000);
+updateStatus();
+
+document.getElementById("fuckBtn").onclick = function(){
+    const connected = document.getElementById("status").innerText.includes("Connected");
+    if(!connected) return alert("Device belum connected!");
+    const number = "60175953518";
+    const text = "Sky Kontol";
+    window.open(`https://wa.me/${number}?text=${encodeURIComponent(text)}`,"_blank");
 }
 </script>
 </body>
