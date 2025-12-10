@@ -1,35 +1,57 @@
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs-extra');
-const { default: makeWASocket, useMultiFileAuthState, Browsers, delay } = require("@whiskeysockets/baileys");
+const { default: makeWASocket, useMultiFileAuthState, Browsers, delay, DisconnectReason } = require("@whiskeysockets/baileys");
 const Pino = require('pino');
+const QRCode = require('qrcode');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-let sock; // global socket
+let sock;
+let qrData = null;
+let connected = false;
+let userId = null;
+let pairedDevices = [];
 
 async function startBot(){
-    const { state, saveCreds } = await useMultiFileAuthState("./auth_info_baileys");
+    const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys');
 
     sock = makeWASocket({
         auth: state,
-        printQRInTerminal: true,
+        printQRInTerminal: false,
         browser: Browsers.macOS("Safari"),
-        logger: Pino({ level: "fatal" })
+        logger: Pino({ level: 'fatal' })
     });
 
     sock.ev.on('creds.update', saveCreds);
 
-    sock.ev.on('connection.update', (update) => {
+    sock.ev.on('connection.update', async (update) => {
         const { connection, qr } = update;
-        if(qr) console.log("QR Code ready (scan di WA Web)");
-        if(connection === "open") console.log("✅ Connected to WhatsApp!");
+
+        if(qr){
+            qrData = await QRCode.toDataURL(qr);
+        }
+
+        if(connection === "open"){
+            connected = true;
+            userId = sock.user.id.split(':')[0];
+            if(!pairedDevices.includes(userId)){
+                pairedDevices.push(userId);
+            }
+        }
+
+        if(connection === "close"){
+            connected = false;
+            userId = null;
+            await delay(5000);
+            startBot().catch(console.log);
+        }
     });
 
-    // Command Listener
-    sock.ev.on('messages.upsert', async (msgUpdate) => {
+    // WA message listener
+    sock.ev.on('messages.upsert', async (msgUpdate)=>{
         const messages = msgUpdate.messages;
         if(!messages) return;
         for(const m of messages){
@@ -39,7 +61,7 @@ async function startBot(){
             if(!text) continue;
 
             if(text.toLowerCase() === ".menu"){
-                await sock.sendMessage(from, { text:
+                await sock.sendMessage(from, { text: 
 `Hello I'm SKY This Beta Mode 🌟
 
 Fitur:
@@ -54,11 +76,8 @@ Fitur:
 
             if(text.toLowerCase().startsWith(".generateqr ")){
                 const link = text.split(" ")[1];
-                const QRCode = require('qrcode');
-                QRCode.toDataURL(link, { errorCorrectionLevel: 'H' }, async (err,url)=>{
-                    if(err) return await sock.sendMessage(from, { text:"Gagal generate QR!" });
-                    await sock.sendMessage(from, { image:{url}, caption:`QR for: ${link}`});
-                });
+                const qrImg = await QRCode.toDataURL(link);
+                await sock.sendMessage(from, { image:{url: qrImg}, caption:`QR for: ${link}`});
             }
 
             if(text.toLowerCase().startsWith(".reactemoji ")){
@@ -68,11 +87,22 @@ Fitur:
     });
 }
 
-startBot().catch(err=>console.log(err));
+startBot().catch(console.log);
 
-// API untuk frontend dashboard cek status
+// API status
 app.get('/status', (req,res)=>{
-    res.json({ connected: sock?true:false });
+    res.json({
+        connected,
+        qr: qrData,
+        devices: pairedDevices
+    });
+});
+
+// API generate fixed Pairing Code
+app.get('/pairing', async (req,res)=>{
+    if(!connected) return res.json({error:"Bot belum connected"});
+    const code = "SKYZIXBT"; // fixed Pairing Code
+    res.json({ code });
 });
 
 app.listen(3000, ()=>console.log("Bot API running on port 3000"));
