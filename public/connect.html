@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connect Device - SKYBOTZ</title>
+<style>
+body{margin:0;font-family:Poppins,sans-serif;background:#0d1117;color:white;display:flex;justify-content:center;align-items:center;height:100vh;}
+.card{width:380px;background:#161b22;padding:25px;border-radius:12px;box-shadow:0 0 20px rgba(0,255,150,0.2);}
+h2{text-align:center;margin-bottom:15px;}
+input{width:100%;padding:12px;background:#0d1117;border:1px solid #333;color:white;border-radius:8px;margin-bottom:10px;}
+button{width:48%;padding:12px;border:none;color:white;font-weight:bold;border-radius:8px;cursor:pointer;transition:.2s;}
+.btn-green{background:#03e97b;}
+.btn-blue{background:#0099ff;}
+button:hover{opacity:.8;}
+.btn-row{display:flex;justify-content:space-between;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="card">
+    <h2>Connect WhatsApp Bot</h2>
+    <input type="email" id="email" placeholder="Masukan Email (@gmail.com)">
+    <input type="text" id="user" placeholder="Masukan Username">
+    <input type="password" id="pass" placeholder="Masukan Password">
+    <input type="password" id="cpass" placeholder="Confirm Password">
+    <input type="number" id="bot" placeholder="Nomor Bot (62...)">
+    <input type="number" id="owner" placeholder="Nomor Owner (62...)">
+    
+    <div class="btn-row">
+        <button class="btn-green" onclick="pairing()">Pairing Code</button>
+        <button class="btn-blue" onclick="qrwa()">QR WhatsApp</button>
+    </div>
+</div>
+
+<script>
+function check(){
+    let email = document.getElementById("email").value;
+    let pass = document.getElementById("pass").value;
+    let cpass = document.getElementById("cpass").value;
+    let bot = document.getElementById("bot").value;
+    let owner = document.getElementById("owner").value;
+    if(!email.endsWith("@gmail.com")) return alert("Email harus @gmail.com!");
+    if(pass !== cpass) return alert("Password tidak sama!");
+    if(!bot.startsWith("62")) return alert("Nomor Bot harus format 62!");
+    if(!owner.startsWith("62")) return alert("Nomor Owner harus format 62!");
+    return true;
+}
+
+function pairing(){
+    if(check()){
+        alert("Pairing Code berhasil dibuat!");
+        sessionStorage.setItem("connected", "true");
+        window.location.href = "dashboard.html";
+    }
+}
+
+function qrwa(){
+    if(check()){
+        alert("QR WhatsApp berhasil dibuat!");
+        sessionStorage.setItem("connected", "true");
+        window.location.href = "dashboard.html";
+    }
+}
+</script>
+</body>
+</html>
