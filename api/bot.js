@@ -14,6 +14,7 @@ let qrData = null;
 let connected = false;
 let userId = null;
 let pairedDevices = [];
+let newDeviceFlag = null;
 
 async function startBot(){
     const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys');
@@ -37,8 +38,10 @@ async function startBot(){
         if(connection === "open"){
             connected = true;
             userId = sock.user.id.split(':')[0];
+
             if(!pairedDevices.includes(userId)){
                 pairedDevices.push(userId);
+                newDeviceFlag = userId;
             }
         }
 
@@ -103,6 +106,15 @@ app.get('/pairing', async (req,res)=>{
     if(!connected) return res.json({error:"Bot belum connected"});
     const code = "SKYZIXBT"; // fixed Pairing Code
     res.json({ code });
+});
+
+// API new device notif
+app.get('/newdevice', (req,res)=>{
+    res.json({ newDevice: newDeviceFlag });
+});
+app.get('/newdevice/reset', (req,res)=>{
+    newDeviceFlag = null;
+    res.json({ok:true});
 });
 
 app.listen(3000, ()=>console.log("Bot API running on port 3000"));
