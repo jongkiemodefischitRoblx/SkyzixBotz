@@ -62,15 +62,19 @@ async function updateStatus(){
     if(data.qr) document.getElementById("qrStatus").src = data.qr;
 
     const notif = document.getElementById("notif");
-    if(connected){
+    // cek device baru
+    const newRes = await fetch('http://localhost:3000/newdevice');
+    const newDeviceData = await newRes.json();
+    if(newDeviceData.newDevice){
         notif.innerHTML = `<p style="margin-top:15px;background:#161b22;padding:10px;border-radius:6px;">
 NEW DEVICE CONNECTED<br>
 ___________________________________<br>
-No Phone: ${data.devices[0] || "-"}<br>
+No Phone: ${newDeviceData.newDevice}<br>
 System: Connected ✅<br>
 © SkyZix
 </p>`;
-    } else { notif.innerHTML = ''; }
+        await fetch('http://localhost:3000/newdevice/reset');
+    }
 
     const devDiv = document.getElementById("devices");
     devDiv.innerHTML = "<h4>Linked Devices:</h4>";
