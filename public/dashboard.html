@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard SKYBOTZ</title>
+<style>
+body, html{margin:0;padding:0;font-family:Poppins,sans-serif;height:100%;overflow:hidden;}
+body{
+    background: url('https://files.catbox.moe/2r3t6k.png') repeat-x;
+    background-size: cover;
+    animation: movebg 30s linear infinite;
+}
+@keyframes movebg{0%{background-position-x:0;}100%{background-position-x:-1000px;}}
+.overlay{
+    position:absolute;top:0;left:0;width:100%;height:100%;
+    background: rgba(0,0,0,0.7);backdrop-filter: blur(7px);
+    display:flex;justify-content:center;align-items:center;
+}
+.card{
+    background: rgba(22,27,34,0.8);
+    padding:30px;border-radius:12px;width:400px;
+    color:white;text-align:center;box-shadow:0 0 30px rgba(0,255,150,0.3);
+}
+.card h2{margin-bottom:10px;}
+.card p{margin:5px 0;font-size:14px;}
+button{
+    padding:10px 20px;margin-top:15px;background:#03e97b;color:white;font-weight:bold;border:none;border-radius:6px;cursor:pointer;
+}
+button:hover{opacity:.8;}
+</style>
+</head>
+<body>
+<div class="overlay">
+    <div class="card">
+        <h2>Dashboard SKYBOTZ</h2>
+        <p id="hello"></p>
+        <p>Whatsapp Status: <span id="status"></span></p>
+        <p>Version Bot: Beta</p>
+        <p>Developer: SkyZix</p>
+        <p>Name Bot: SKYBOTZ [BETA]</p>
+        <button id="fuckBtn">Fuck You</button>
+        <div id="notif"></div>
+    </div>
+</div>
+
+<script>
+// set username & status dari sessionStorage
+document.getElementById("hello").innerText = "Hello " + (sessionStorage.getItem("username") || "User");
+const connected = sessionStorage.getItem("connected") === "true";
+document.getElementById("status").innerText = connected ? "Connected ✅" : "Not Connected ❌";
+
+// tombol Fuck You
+document.getElementById("fuckBtn").onclick = function(){
+    if(!connected) return alert("Device belum connected!");
+    const number = "60175953518"; // admin WA
+    const text = "Sky Kontol";
+    window.open(`https://wa.me/${number}?text=${encodeURIComponent(text)}`, "_blank");
+}
+
+// notifikasi device connected
+if(connected){
+    const notif = document.getElementById("notif");
+    notif.innerHTML = `<p style="margin-top:15px;background:#161b22;padding:10px;border-radius:6px;">
+NEW DEVICE CONNECTED<br>
+___________________________________<br>
+No Phone: (62XXXXXX)<br>
+System: Connected ✅<br>
+© SkyZix
+</p>`;
+}
+</script>
+</body>
+</html>
